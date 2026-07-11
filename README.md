@@ -1,5 +1,30 @@
 # skillfit
 
-`skillfit` is a local-first CLI for checking whether an agent skill is ready to reuse. It reads a skill folder, scores the instructions against practical activation, input, safety, example, and verification criteria, and emits Markdown or JSON reports.
+`skillfit` is a local-first CLI for checking whether an agent skill is ready to reuse. It reads a skill folder, scores practical readiness criteria, and emits Markdown or JSON reports for review or CI.
 
-This repository is being prepared as an initial public build. See `docs/PRD.md` for the scope.
+## Quickstart
+
+```bash
+npm test
+npm run smoke
+node bin/skillfit.js fixtures/valid-skill --format markdown
+node bin/skillfit.js fixtures/valid-skill --format json --out tmp/report.json
+```
+
+## What It Checks
+
+- `SKILL.md` exists.
+- Activation guidance is clear.
+- Required inputs or tools are named.
+- Side-effect boundaries and approval requirements are explicit.
+- Examples or workflow steps are present.
+- Verification commands are documented.
+- Host-specific assumptions are limited.
+
+## Safety Notes
+
+`skillfit` reads local files and only writes a report when `--out` is provided. It does not install skills, approve proposals, call external services, or mutate the inspected directory.
+
+## Limitations
+
+The V1 rubric is intentionally deterministic and text based. It is best used as a release gate and review checklist, not as proof that a skill is semantically perfect.
