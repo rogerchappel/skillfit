@@ -4,11 +4,23 @@
   "description": "Local-first readiness checker for reusable agent skills.",
   "type": "module",
   "bin": { "skillfit": "./bin/skillfit.js" },
+  "files": [
+    "bin",
+    "src",
+    "dist",
+    "docs",
+    "fixtures",
+    "SKILL.md",
+    "README.md",
+    "LICENSE"
+  ],
   "scripts": {
     "test": "node --test",
     "check": "node scripts/check.js",
     "build": "node scripts/build.js",
-    "smoke": "node bin/skillfit.js fixtures/valid-skill --format markdown --out tmp/smoke.md && test -s tmp/smoke.md"
+    "smoke": "node bin/skillfit.js --help && node bin/skillfit.js --version && node bin/skillfit.js fixtures/valid-skill --format markdown --out tmp/smoke.md && test -s tmp/smoke.md",
+    "package:smoke": "node scripts/package-smoke.js",
+    "release:check": "npm run check && npm test && npm run build && npm run smoke && npm run package:smoke"
   },
   "keywords": ["agent-skills", "cli", "readiness", "lint", "openclaw"],
   "author": "Roger Chappel",
