@@ -8,8 +8,22 @@
     "test": "node --test",
     "check": "node scripts/check.js",
     "build": "node scripts/build.js",
-    "smoke": "node bin/skillfit.js fixtures/valid-skill --format markdown --out tmp/smoke.md && test -s tmp/smoke.md"
+    "smoke": "node bin/skillfit.js --help && node bin/skillfit.js --version && node bin/skillfit.js fixtures/valid-skill --format markdown --out tmp/smoke.md && test -s tmp/smoke.md",
+    "package:smoke": "npm pack --dry-run",
+    "release:check": "npm run check && npm test && npm run build && npm run smoke && npm run package:smoke"
   },
+  "files": [
+    "bin",
+    "src",
+    "docs",
+    "fixtures",
+    "SKILL.md",
+    "README.md",
+    "LICENSE",
+    "SECURITY.md",
+    "CONTRIBUTING.md",
+    "CHANGELOG.md"
+  ],
   "keywords": ["agent-skills", "cli", "readiness", "lint", "openclaw"],
   "author": "Roger Chappel",
   "license": "MIT",
