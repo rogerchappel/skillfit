@@ -9,6 +9,9 @@ export async function run(argv) {
   if (!target || target === '--help' || target === '-h') {
     return { code: 0, output: 'Usage: skillfit <skill-dir> [--format markdown|json] [--out file]\n' };
   }
+  if (target === '--version' || target === '-v') {
+    return { code: 0, output: '0.1.0\n' };
+  }
   const formatIndex = args.indexOf('--format');
   const format = formatIndex >= 0 ? args[formatIndex + 1] : 'markdown';
   const outIndex = args.indexOf('--out');
