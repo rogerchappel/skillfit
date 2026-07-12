@@ -5,6 +5,17 @@
 ## Quickstart
 
 ```bash
+npm install -g skillfit
+skillfit --help
+skillfit --version
+skillfit ./path/to/skill --format markdown
+```
+
+For local development:
+
+```bash
+npm install
+npm run release:check
 npm test
 npm run smoke
 node bin/skillfit.js fixtures/valid-skill --format markdown
