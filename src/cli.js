@@ -2,10 +2,14 @@ import { mkdir, writeFile } from 'node:fs/promises';
 import { dirname } from 'node:path';
 import { inspectSkill } from './inspect.js';
 import { toJson, toMarkdown } from './report.js';
+import pkg from '../package.json' with { type: 'json' };
 
 export async function run(argv) {
   const args = [...argv];
   const target = args.shift();
+  if (target === '--version' || target === '-v') {
+    return { code: 0, output: `${pkg.version}\n` };
+  }
   if (!target || target === '--help' || target === '-h') {
     return { code: 0, output: 'Usage: skillfit <skill-dir> [--format markdown|json] [--out file]\n' };
   }
