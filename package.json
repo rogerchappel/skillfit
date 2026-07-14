@@ -14,7 +14,10 @@
     "fixtures",
     "SKILL.md",
     "README.md",
-    "LICENSE"
+    "LICENSE",
+    "SECURITY.md",
+    "CHANGELOG.md",
+    "CONTRIBUTING.md"
   ],
   "scripts": {
     "test": "node --test",
@@ -39,5 +42,9 @@
   "repository": {
     "type": "git",
     "url": "git+https://github.com/rogerchappel/skillfit.git"
-  }
+  },
+  "bugs": {
+    "url": "https://github.com/rogerchappel/skillfit/issues"
+  },
+  "homepage": "https://github.com/rogerchappel/skillfit#readme"
 }
