@@ -1,9 +1,11 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { createRequire } from 'node:module';
 import { run } from '../src/cli.js';
-import pkg from '../package.json' with { type: 'json' };
 import { toJson, toMarkdown } from '../src/report.js';
 
+const require = createRequire(import.meta.url);
+const pkg = require('../package.json');
 const report = { skillDir: 'x', score: 85, grade: 'ship', results: [{ id: 'a', label: 'A', status: 'pass', weight: 10 }] };
 
 test('renders json report', () => {
