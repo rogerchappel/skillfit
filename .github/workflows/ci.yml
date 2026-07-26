@@ -9,10 +9,15 @@ on:
 jobs:
   release-check:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version:
+          - 18.18.2
+          - 20
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: ${{ matrix.node-version }}
       - run: npm install
       - run: npm run release:check
