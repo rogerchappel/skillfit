@@ -26,6 +26,9 @@ const requiredFiles = [
 ];
 const forbiddenFiles = [
   'tmp/smoke.md',
+  'tmp/smoke.json',
+  'tmp/smoke-out.json',
+  'test/cli.test.js',
   'test/inspect.test.js',
   'test/report.test.js',
 ];

@@ -23,7 +23,7 @@
     "test": "node --test",
     "check": "node scripts/check.js",
     "build": "node scripts/build.js",
-    "smoke": "node bin/skillfit.js --help && node bin/skillfit.js --version && node bin/skillfit.js fixtures/valid-skill --format markdown --out tmp/smoke.md && test -s tmp/smoke.md",
+    "smoke": "node bin/skillfit.js --help && node bin/skillfit.js --version && node bin/skillfit.js fixtures/valid-skill --format markdown > tmp/smoke.md && node bin/skillfit.js fixtures/valid-skill --format json > tmp/smoke.json && node bin/skillfit.js fixtures/valid-skill --format json --out tmp/smoke-out.json && test -s tmp/smoke.md && test -s tmp/smoke.json && test -s tmp/smoke-out.json",
     "package:smoke": "node scripts/package-smoke.js",
     "release:check": "npm run check && npm test && npm run build && npm run smoke && npm run package:smoke"
   },

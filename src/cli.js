@@ -1,8 +1,11 @@
 import { mkdir, writeFile } from 'node:fs/promises';
+import { createRequire } from 'node:module';
 import { dirname } from 'node:path';
 import { inspectSkill } from './inspect.js';
 import { toJson, toMarkdown } from './report.js';
-import pkg from '../package.json' with { type: 'json' };
+
+const require = createRequire(import.meta.url);
+const pkg = require('../package.json');
 
 export async function run(argv) {
   const args = [...argv];

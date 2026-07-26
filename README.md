@@ -31,7 +31,7 @@ Run the full local gate before opening a release-facing pull request:
 npm run release:check
 ```
 
-The gate runs syntax checks, tests, the build step, fixture-backed CLI smoke, and package contents verification. CI runs the same command for pull requests and pushes to `main`.
+The gate runs syntax checks, tests, the build step, fixture-backed CLI smoke, and package contents verification. CI runs the same command on Node 18.18.2 (the supported Node 18 baseline) and Node 20 for pull requests and pushes to `main`.
 
 ## Safety Notes
 
