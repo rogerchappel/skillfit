@@ -39,4 +39,20 @@ The gate runs syntax checks, tests, the build step, fixture-backed CLI smoke, an
 
 ## Limitations
 
-The V1 rubric is intentionally deterministic and text based. It is best used as a release gate and review checklist, not as proof that a skill is semantically perfect.
+The V1 rubric is intentionally deterministic and text based. Inputs, side effects,
+examples/workflow, and verification must appear under level 2–6 Markdown headings.
+Supported heading names are:
+
+- Inputs: `Inputs`, `Requirements`, `Required Inputs`, `Required Tools`, or `Tools`.
+- Boundaries: `Side Effects`, `Safety`, `Permissions`, or `Approval Boundaries`.
+- Procedure: `Examples`, `Workflow`, `Steps`, or `Usage`.
+- Checks: `Verification`, `Validation`, `Testing`, or `Tests`.
+
+These sections must contain concrete evidence: a declared input/tool, an explicit
+operation boundary, a list or fenced example/workflow, and a command or imperative
+validation instruction, respectively. A heading by itself, placeholder such as
+“not provided,” or keywords embedded in unrelated prose do not pass.
+
+The rubric does not interpret whether instructions are correct or safe in context.
+Use it as a release gate and review checklist, not as proof that a skill is
+semantically perfect.

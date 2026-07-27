@@ -8,6 +8,7 @@ import { fileURLToPath } from 'node:url';
 
 const cli = fileURLToPath(new URL('../bin/skillfit.js', import.meta.url));
 const validSkill = fileURLToPath(new URL('../fixtures/valid-skill', import.meta.url));
+const negatedSkill = fileURLToPath(new URL('../fixtures/negated-keywords-skill', import.meta.url));
 
 function invoke(...args) {
   return spawnSync(process.execPath, [cli, ...args], { encoding: 'utf8' });
@@ -44,4 +45,10 @@ test('package entrypoint writes an output file', async () => {
   } finally {
     await rm(directory, { recursive: true, force: true });
   }
+});
+
+test('package entrypoint rejects negated keyword filler', () => {
+  const result = invoke(negatedSkill, '--format', 'json');
+  assert.equal(result.status, 1, result.stderr);
+  assert.equal(JSON.parse(result.stdout).grade, 'revise');
 });
