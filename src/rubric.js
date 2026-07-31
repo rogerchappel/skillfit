@@ -6,23 +6,24 @@ const sectionAliases = {
 };
 
 function sections(text) {
-  const result = new Map();
+  const result = [];
   const matches = [...text.matchAll(/^#{2,6}\s+(.+?)\s*$/gm)];
   for (let index = 0; index < matches.length; index += 1) {
     const heading = matches[index][1].trim().toLowerCase();
     const start = matches[index].index + matches[index][0].length;
     const end = matches[index + 1]?.index ?? text.length;
-    result.set(heading, text.slice(start, end).trim());
+    result.push({ heading, content: text.slice(start, end).trim() });
   }
   return result;
 }
 
 function section(ctx, names) {
   const parsed = ctx.sections ??= sections(ctx.text);
-  for (const name of names) {
-    if (parsed.has(name)) return parsed.get(name);
-  }
-  return '';
+  const supported = new Set(names);
+  return parsed
+    .filter(({ heading, content }) => supported.has(heading) && !isPlaceholder(content))
+    .map(({ content }) => content)
+    .join('\n');
 }
 
 function hasSubstance(value) {
