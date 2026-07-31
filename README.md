@@ -52,6 +52,9 @@ These sections must contain concrete evidence: a declared input/tool, an explici
 operation boundary, a list or fenced example/workflow, and a command or imperative
 validation instruction, respectively. A heading by itself, placeholder such as
 “not provided,” or keywords embedded in unrelated prose do not pass.
+When a category uses repeated headings or more than one supported alias, the rubric
+combines its substantive sections in document order. Placeholder-only sections are
+ignored, so they neither override concrete evidence nor create a passing result.
 
 The rubric does not interpret whether instructions are correct or safe in context.
 Use it as a release gate and review checklist, not as proof that a skill is
