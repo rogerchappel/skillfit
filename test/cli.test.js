@@ -52,3 +52,34 @@ test('package entrypoint rejects negated keyword filler', () => {
   assert.equal(result.status, 1, result.stderr);
   assert.equal(JSON.parse(result.stdout).grade, 'revise');
 });
+
+for (const [name, args, diagnostic] of [
+  ['unknown options', [validSkill, '--bogus'], 'Unknown option: --bogus'],
+  ['missing option values', [validSkill, '--out'], 'Missing value for --out'],
+  ['duplicate options', [validSkill, '--format', 'json', '--format', 'markdown'], 'Duplicate option: --format'],
+  ['extra operands', [validSkill, validSkill], `Unexpected operand: ${validSkill}`],
+  ['invalid formats', [validSkill, '--format', 'yaml'], 'Unsupported format: yaml']
+]) {
+  test(`package entrypoint rejects ${name} with exit 2`, () => {
+    const result = invoke(...args);
+    assert.equal(result.status, 2);
+    assert.equal(result.stdout, '');
+    assert.equal(result.stderr, `${diagnostic}\nUsage: skillfit <skill-dir> [--format markdown|json] [--out file]\n`);
+  });
+}
+
+test('package entrypoint distinguishes missing input from rubric failure', async () => {
+  const directory = await mkdtemp(join(tmpdir(), 'skillfit-empty-'));
+  try {
+    const missing = invoke(join(directory, 'does-not-exist'), '--format', 'json');
+    assert.equal(missing.status, 2);
+    assert.equal(missing.stdout, '');
+    assert.match(missing.stderr, /directory does not exist/);
+
+    const revise = invoke(directory, '--format', 'json');
+    assert.equal(revise.status, 1, revise.stderr);
+    assert.equal(JSON.parse(revise.stdout).grade, 'revise');
+  } finally {
+    await rm(directory, { recursive: true, force: true });
+  }
+});

@@ -13,6 +13,21 @@ node bin/skillfit.js fixtures/valid-skill --format markdown
 node bin/skillfit.js fixtures/valid-skill --format json --out tmp/report.json
 ```
 
+## Command-line usage
+
+```text
+Usage: skillfit <skill-dir> [--format markdown|json] [--out file]
+```
+
+Pass exactly one skill directory. `--format` and `--out` may each be used once
+and require a value. Unknown options, duplicate options, extra operands, missing
+values, and unsupported formats print a concise usage diagnostic and exit 2.
+
+Exit 0 means the skill earned a `ship` grade. Exit 1 means an existing skill
+directory was inspected and earned `revise`, including when that directory has no
+`SKILL.md`. A missing or unreadable input is an operational error and exits 2;
+it is not emitted as a rubric report.
+
 ## What It Checks
 
 - `SKILL.md` exists.

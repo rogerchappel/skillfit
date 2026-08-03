@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdtemp, rm, writeFile } from 'node:fs/promises';
+import { mkdir, mkdtemp, rm, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import { inspectSkill } from '../src/inspect.js';
@@ -60,6 +60,45 @@ test('flags a thin skill for revision', async () => {
   const report = await inspectSkill('fixtures/problem-skill');
   assert.equal(report.grade, 'revise');
   assert.ok(report.results.some(result => result.status === 'fail'));
+});
+
+test('treats an existing directory without SKILL.md as a revise report', async t => {
+  const directory = await mkdtemp(join(tmpdir(), 'skillfit-missing-file-'));
+  t.after(() => rm(directory, { recursive: true, force: true }));
+  const report = await inspectSkill(directory);
+  assert.equal(report.grade, 'revise');
+  assert.equal(report.results.find(({ id }) => id === 'has-skill-md').status, 'fail');
+});
+
+test('rejects a missing input directory', async () => {
+  await assert.rejects(() => inspectSkill(join(tmpdir(), 'skillfit-does-not-exist')), error => {
+    assert.equal(error.code, 'ERR_INPUT');
+    assert.match(error.message, /^Cannot inspect .*: directory does not exist$/);
+    return true;
+  });
+});
+
+test('rejects an input path that is not a directory', async t => {
+  const directory = await mkdtemp(join(tmpdir(), 'skillfit-file-input-'));
+  t.after(() => rm(directory, { recursive: true, force: true }));
+  const file = join(directory, 'input.md');
+  await writeFile(file, '# not a directory');
+  await assert.rejects(() => inspectSkill(file), error => {
+    assert.equal(error.code, 'ERR_INPUT');
+    assert.match(error.message, /: not a directory$/);
+    return true;
+  });
+});
+
+test('rejects an unreadable SKILL.md input', async t => {
+  const directory = await mkdtemp(join(tmpdir(), 'skillfit-unreadable-'));
+  t.after(() => rm(directory, { recursive: true, force: true }));
+  await mkdir(join(directory, 'SKILL.md'));
+  await assert.rejects(() => inspectSkill(directory), error => {
+    assert.equal(error.code, 'ERR_INPUT');
+    assert.match(error.message, /Cannot read .*SKILL\.md/);
+    return true;
+  });
 });
 
 test('rejects long prose that only negates rubric keywords', async () => {
