@@ -67,3 +67,19 @@ test('writes reports to --out', async t => {
   assert.equal(result.output, `${outputPath}\n`);
   assert.equal(JSON.parse(await readFile(outputPath, 'utf8')).grade, 'ship');
 });
+
+test('returns exit 1 for an incubate report', async () => {
+  const result = await run(['fixtures/incubate-skill', '--format', 'json']);
+  assert.equal(result.code, 1);
+  assert.equal(JSON.parse(result.output).grade, 'incubate');
+});
+
+test('returns exit 1 when writing an incubate report to --out', async t => {
+  const directory = await mkdtemp(join(tmpdir(), 'skillfit-incubate-'));
+  t.after(() => rm(directory, { recursive: true, force: true }));
+  const outputPath = join(directory, 'report.json');
+  const result = await run(['fixtures/incubate-skill', '--format', 'json', '--out', outputPath]);
+  assert.equal(result.code, 1);
+  assert.equal(result.output, `${outputPath}\n`);
+  assert.equal(JSON.parse(await readFile(outputPath, 'utf8')).grade, 'incubate');
+});

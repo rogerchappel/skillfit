@@ -45,6 +45,10 @@ function parseArguments(argv) {
   return { target, format, out };
 }
 
+function exitCodeFor(report) {
+  return report.grade === 'ship' ? 0 : 1;
+}
+
 export async function run(argv) {
   if (argv.length === 1 && (argv[0] === '--version' || argv[0] === '-v')) {
     return { code: 0, output: `${pkg.version}\n` };
@@ -58,7 +62,7 @@ export async function run(argv) {
   if (out) {
     await mkdir(dirname(out), { recursive: true });
     await writeFile(out, output);
-    return { code: report.grade === 'revise' ? 1 : 0, output: `${out}\n` };
+    return { code: exitCodeFor(report), output: `${out}\n` };
   }
-  return { code: report.grade === 'revise' ? 1 : 0, output };
+  return { code: exitCodeFor(report), output };
 }
