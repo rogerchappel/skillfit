@@ -24,9 +24,10 @@ and require a value. Unknown options, duplicate options, extra operands, missing
 values, and unsupported formats print a concise usage diagnostic and exit 2.
 
 Exit 0 means the skill earned a `ship` grade. Exit 1 means an existing skill
-directory was inspected and earned `revise`, including when that directory has no
-`SKILL.md`. A missing or unreadable input is an operational error and exits 2;
-it is not emitted as a rubric report.
+directory was inspected and earned either `incubate` or `revise`, including when
+that directory has no `SKILL.md`. A missing or unreadable input is an operational
+error and exits 2; it is not emitted as a rubric report. These exit codes are the
+same whether the report is printed to stdout or written with `--out`.
 
 ## What It Checks
 
