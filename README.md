@@ -71,6 +71,8 @@ validation instruction, respectively. A heading by itself, placeholder such as
 When a category uses repeated headings or more than one supported alias, the rubric
 combines its substantive sections in document order. Placeholder-only sections are
 ignored, so they neither override concrete evidence nor create a passing result.
+Headings shown inside backtick or tilde fenced code samples are also ignored. Fenced
+commands inside a real supported section still count as that section's evidence.
 
 The rubric does not interpret whether instructions are correct or safe in context.
 Use it as a release gate and review checklist, not as proof that a skill is

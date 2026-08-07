@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Ignore apparent rubric sections inside fenced code samples while retaining fenced
+  command evidence under real workflow and verification headings.
 - Require structured, substantive evidence for inputs, side-effect boundaries,
   examples/workflows, and verification instead of accepting keyword-only prose.
 - Add regression fixtures for negated filler and supported heading variants.
