@@ -171,3 +171,65 @@ test('aggregates multiple concrete aliases', async t => {
 - Node.js 18 or newer`);
   assertStablePerfectReport(report);
 });
+
+test('does not treat headings inside fenced samples as rubric sections', async t => {
+  const directory = await mkdtemp(join(tmpdir(), 'skillfit-fenced-sample-'));
+  t.after(() => rm(directory, { recursive: true, force: true }));
+  await writeFile(join(directory, 'SKILL.md'), `# sample-authoring-skill
+
+Use this skill when writing long illustrative samples for documentation. The surrounding
+instructions deliberately provide enough explanatory prose to satisfy the length check,
+but they do not make any concrete input, safety, workflow, or verification declarations.
+The sample below is reference material only and must not manufacture release readiness.
+
+~~~markdown
+## Inputs
+
+- local repository path
+
+## Safety
+
+The workflow reads local files only and never writes without approval.
+
+## Steps
+
+1. Read the repository.
+2. Produce the report.
+
+## Verification
+
+Run the tests with \`npm test\` and retain the output for review.
+~~~
+
+Additional prose keeps this document realistic and substantial while making clear that
+all apparent rubric evidence exists only in the fenced Markdown sample above.
+`);
+
+  const report = await inspectSkill(directory);
+  assert.equal(report.score, 48);
+  assert.equal(report.grade, 'revise');
+  for (const id of ['inputs', 'side-effects', 'examples', 'verification']) {
+    assert.equal(report.results.find(result => result.id === id).status, 'fail');
+  }
+});
+
+test('retains fenced command examples inside real rubric sections', async t => {
+  const report = await inspectWithInputs(t, `## Inputs
+
+- local repository path
+
+## Workflow
+
+\`\`\`sh
+npm install
+npm run build
+\`\`\`
+
+## Validation
+
+~~~sh
+npm test
+~~~`);
+
+  assertStablePerfectReport(report);
+});
