@@ -7,10 +7,33 @@ const sectionAliases = {
 
 function sections(text) {
   const result = [];
-  const matches = [...text.matchAll(/^#{2,6}\s+(.+?)\s*$/gm)];
+  const matches = [];
+  let fence;
+
+  for (const line of text.matchAll(/^.*$/gm)) {
+    const value = line[0].replace(/\r$/, '');
+
+    if (fence) {
+      const closing = value.match(/^ {0,3}(`{3,}|~{3,})[ \t]*$/);
+      if (closing && closing[1][0] === fence.marker && closing[1].length >= fence.length) {
+        fence = undefined;
+      }
+      continue;
+    }
+
+    const opening = value.match(/^ {0,3}(`{3,}|~{3,})(.*)$/);
+    if (opening && (opening[1][0] === '~' || !opening[2].includes('`'))) {
+      fence = { marker: opening[1][0], length: opening[1].length };
+      continue;
+    }
+
+    const heading = value.match(/^#{2,6}\s+(.+?)\s*$/);
+    if (heading) matches.push({ index: line.index, raw: value, heading: heading[1] });
+  }
+
   for (let index = 0; index < matches.length; index += 1) {
-    const heading = matches[index][1].trim().toLowerCase();
-    const start = matches[index].index + matches[index][0].length;
+    const heading = matches[index].heading.trim().toLowerCase();
+    const start = matches[index].index + matches[index].raw.length;
     const end = matches[index + 1]?.index ?? text.length;
     result.push({ heading, content: text.slice(start, end).trim() });
   }
