@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { mkdtemp, readFile, rm } from 'node:fs/promises';
+import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { spawnSync } from 'node:child_process';
@@ -52,6 +52,21 @@ test('package entrypoint rejects negated keyword filler', () => {
   const result = invoke(negatedSkill, '--format', 'json');
   assert.equal(result.status, 1, result.stderr);
   assert.equal(JSON.parse(result.stdout).grade, 'revise');
+});
+
+test('package entrypoint accepts supported headings with closing hashes', async () => {
+  const directory = await mkdtemp(join(tmpdir(), 'skillfit-cli-closing-hashes-'));
+  try {
+    const source = await readFile(join(validSkill, 'SKILL.md'), 'utf8');
+    const skill = source.replace(/^(#{2,6} (?:Inputs|Side Effects|Workflow|Verification))$/gm, '$1 ###');
+    await writeFile(join(directory, 'SKILL.md'), skill.replaceAll('\n', '\r\n'));
+
+    const result = invoke(directory, '--format', 'json');
+    assert.equal(result.status, 0, result.stderr);
+    assert.equal(JSON.parse(result.stdout).grade, 'ship');
+  } finally {
+    await rm(directory, { recursive: true, force: true });
+  }
 });
 
 test('package entrypoint exits 1 for an incubate report', () => {

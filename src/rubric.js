@@ -27,7 +27,7 @@ function sections(text) {
       continue;
     }
 
-    const heading = value.match(/^#{2,6}\s+(.+?)\s*$/);
+    const heading = value.match(/^#{2,6}[ \t]+(.+?)(?:[ \t]+#+[ \t]*)?$/);
     if (heading) matches.push({ index: line.index, raw: value, heading: heading[1] });
   }
 
