@@ -57,6 +57,8 @@ The gate runs syntax checks, tests, the build step, fixture-backed CLI smoke, an
 
 The V1 rubric is intentionally deterministic and text based. Inputs, side effects,
 examples/workflow, and verification must appear under level 2–6 Markdown headings.
+Valid CommonMark closing hash sequences are accepted when whitespace separates them
+from the heading text (for example, `## Inputs ###`).
 Supported heading names are:
 
 - Inputs: `Inputs`, `Requirements`, `Required Inputs`, `Required Tools`, or `Tools`.
