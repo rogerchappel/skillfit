@@ -116,6 +116,43 @@ test('accepts supported section aliases with concrete declarations', async () =>
   assert.equal(report.score, 100);
 });
 
+test('accepts CommonMark closing hash sequences on supported headings', async t => {
+  const directory = await mkdtemp(join(tmpdir(), 'skillfit-closing-hashes-'));
+  t.after(() => rm(directory, { recursive: true, force: true }));
+  await writeFile(join(directory, 'SKILL.md'), completeSkill(`## Required Tools ###
+
+- Node.js 18 or newer`)
+    .replace('## Side Effects', '### Approval Boundaries #')
+    .replace('## Steps', '#### Usage ####')
+    .replace('## Verification', '###### Tests ##'));
+
+  assertStablePerfectReport(await inspectSkill(directory));
+});
+
+test('accepts closing hash sequences in CRLF documents', async t => {
+  const directory = await mkdtemp(join(tmpdir(), 'skillfit-closing-hashes-crlf-'));
+  t.after(() => rm(directory, { recursive: true, force: true }));
+  const skill = completeSkill(`## Inputs\t###
+
+- local repository path`)
+    .replace('## Side Effects', '## Safety ###')
+    .replace('## Steps', '## Workflow ###')
+    .replace('## Verification', '## Validation ###')
+    .replaceAll('\n', '\r\n');
+  await writeFile(join(directory, 'SKILL.md'), skill);
+
+  assertStablePerfectReport(await inspectSkill(directory));
+});
+
+test('does not remove hashes without the required preceding whitespace', async t => {
+  const report = await inspectWithInputs(t, `## Inputs###
+
+- local repository path`);
+
+  assert.equal(report.results.find(({ id }) => id === 'inputs').status, 'fail');
+  assert.equal(report.score, 88);
+});
+
 test('aggregates repeated identical headings in document order', async t => {
   const report = await inspectWithInputs(t, `## Inputs
 
@@ -211,6 +248,21 @@ all apparent rubric evidence exists only in the fenced Markdown sample above.
   for (const id of ['inputs', 'side-effects', 'examples', 'verification']) {
     assert.equal(report.results.find(result => result.id === id).status, 'fail');
   }
+});
+
+test('ignores closing-hash headings inside fenced samples', async t => {
+  const report = await inspectWithInputs(t, `~~~markdown
+## Required Inputs ###
+
+- local repository path
+~~~
+
+## Inputs###
+
+- text hashes are not a supported heading name`);
+
+  assert.equal(report.results.find(({ id }) => id === 'inputs').status, 'fail');
+  assert.equal(report.score, 88);
 });
 
 test('retains fenced command examples inside real rubric sections', async t => {
