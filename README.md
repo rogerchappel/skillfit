@@ -59,6 +59,8 @@ The V1 rubric is intentionally deterministic and text based. Inputs, side effect
 examples/workflow, and verification must appear under level 2–6 Markdown headings.
 Valid CommonMark closing hash sequences are accepted when whitespace separates them
 from the heading text (for example, `## Inputs ###`).
+Each supported section includes nested child headings and their content until the next
+heading of equal or higher rank.
 Supported heading names are:
 
 - Inputs: `Inputs`, `Requirements`, `Required Inputs`, `Required Tools`, or `Tools`.
