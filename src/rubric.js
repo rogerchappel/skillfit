@@ -5,9 +5,8 @@ const sectionAliases = {
   verification: ['verification', 'validation', 'testing', 'tests']
 };
 
-function sections(text) {
-  const result = [];
-  const matches = [];
+function linesOutsideFences(text) {
+  const lines = [];
   let fence;
 
   for (const line of text.matchAll(/^.*$/gm)) {
@@ -27,8 +26,19 @@ function sections(text) {
       continue;
     }
 
+    lines.push({ index: line.index, value });
+  }
+
+  return lines;
+}
+
+function sections(text) {
+  const result = [];
+  const matches = [];
+
+  for (const { index, value } of linesOutsideFences(text)) {
     const heading = value.match(/^#{2,6}[ \t]+(.+?)(?:[ \t]+#+[ \t]*)?$/);
-    if (heading) matches.push({ index: line.index, raw: value, heading: heading[1] });
+    if (heading) matches.push({ index, raw: value, heading: heading[1] });
   }
 
   for (let index = 0; index < matches.length; index += 1) {
@@ -38,6 +48,11 @@ function sections(text) {
     result.push({ heading, content: text.slice(start, end).trim() });
   }
   return result;
+}
+
+function hasActivationGuidance(ctx) {
+  const text = linesOutsideFences(ctx.text).map(({ value }) => value).join('\n');
+  return /use this skill|when to use|trigger/i.test(text);
 }
 
 function section(ctx, names) {
@@ -87,7 +102,7 @@ function hasVerification(ctx) {
 
 export const checks = [
   { id: 'has-skill-md', label: 'Includes SKILL.md', weight: 15, test: ctx => ctx.exists },
-  { id: 'activation', label: 'Clear activation guidance', weight: 15, test: ctx => /use this skill|when to use|trigger/i.test(ctx.text) },
+  { id: 'activation', label: 'Clear activation guidance', weight: 15, test: hasActivationGuidance },
   { id: 'inputs', label: 'Required inputs or tools are named', weight: 12, test: hasDeclaredInputs },
   { id: 'side-effects', label: 'Side-effect boundaries are explicit', weight: 14, test: hasSideEffectBoundary },
   { id: 'examples', label: 'Examples or workflow steps exist', weight: 12, test: hasExamplesOrWorkflow },

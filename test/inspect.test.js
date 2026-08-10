@@ -26,9 +26,13 @@ Run the tests with \`npm test\` and retain the result for repeatable review. The
 `;
 
 async function inspectWithInputs(t, inputs) {
+  return inspectDocument(t, completeSkill(inputs));
+}
+
+async function inspectDocument(t, text) {
   const directory = await mkdtemp(join(tmpdir(), 'skillfit-aggregation-'));
   t.after(() => rm(directory, { recursive: true, force: true }));
-  await writeFile(join(directory, 'SKILL.md'), completeSkill(inputs));
+  await writeFile(join(directory, 'SKILL.md'), text);
   return inspectSkill(directory);
 }
 
@@ -248,6 +252,58 @@ all apparent rubric evidence exists only in the fenced Markdown sample above.
   for (const id of ['inputs', 'side-effects', 'examples', 'verification']) {
     assert.equal(report.results.find(result => result.id === id).status, 'fail');
   }
+});
+
+test('does not treat activation guidance inside backtick or tilde fences as evidence', async t => {
+  for (const fence of ['```', '~~~']) {
+    const text = completeSkill(`## Inputs
+
+- local repository path
+
+${fence}markdown
+Use this skill when a user requests the demo.
+${fence}`).replace(
+      'Use this skill when testing deterministic section aggregation behavior.',
+      'This document describes deterministic section aggregation behavior.'
+    );
+    const report = await inspectDocument(t, text);
+
+    assert.equal(report.results.find(({ id }) => id === 'activation').status, 'fail');
+    assert.equal(report.score, 85);
+  }
+});
+
+test('treats the remainder of an unclosed fence as non-guidance content', async t => {
+  const text = completeSkill(`## Inputs
+
+- local repository path
+
+\`\`\`markdown
+Use this skill when a user requests the demo.`).replace(
+    'Use this skill when testing deterministic section aggregation behavior.',
+    'This document describes deterministic section aggregation behavior.'
+  );
+  const report = await inspectDocument(t, text);
+
+  assert.equal(report.results.find(({ id }) => id === 'activation').status, 'fail');
+});
+
+test('retains real activation guidance adjacent to fenced examples', async t => {
+  const text = completeSkill(`## Inputs
+
+- local repository path
+
+\`\`\`markdown
+Trigger this sample from a fictional prompt.
+\`\`\`
+
+Use this skill when reviewing a repository's release readiness.`);
+  const report = await inspectDocument(t, text.replace(
+    'Use this skill when testing deterministic section aggregation behavior.',
+    'This document describes deterministic section aggregation behavior.'
+  ));
+
+  assertStablePerfectReport(report);
 });
 
 test('ignores closing-hash headings inside fenced samples', async t => {
