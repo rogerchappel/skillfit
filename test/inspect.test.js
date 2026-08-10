@@ -213,6 +213,63 @@ test('aggregates multiple concrete aliases', async t => {
   assertStablePerfectReport(report);
 });
 
+test('retains list evidence beneath nested child headings', async t => {
+  const report = await inspectWithInputs(t, `## Inputs
+
+### Required values
+
+- local repository path`);
+
+  assertStablePerfectReport(report);
+});
+
+test('retains fenced evidence beneath nested child headings', async t => {
+  const report = await inspectDocument(t, completeSkill(`## Inputs
+
+- local repository path`).replace(`## Steps
+
+1. Read the supplied repository path.
+2. Produce a deterministic report for the maintainer.`, `## Examples
+
+### Local check
+
+\`\`\`sh
+npm run check
+\`\`\``));
+
+  assertStablePerfectReport(report);
+});
+
+test('ends a rubric section at the next heading of equal rank', async t => {
+  const report = await inspectWithInputs(t, `## Inputs
+
+### Notes
+
+None.
+
+## Appendix
+
+- local repository path`);
+
+  assert.equal(report.results.find(({ id }) => id === 'inputs').status, 'fail');
+  assert.equal(report.score, 88);
+});
+
+test('ends a rubric section at the next heading of higher rank', async t => {
+  const report = await inspectWithInputs(t, `### Inputs
+
+#### Notes
+
+None.
+
+## Appendix
+
+- local repository path`);
+
+  assert.equal(report.results.find(({ id }) => id === 'inputs').status, 'fail');
+  assert.equal(report.score, 88);
+});
+
 test('does not treat headings inside fenced samples as rubric sections', async t => {
   const directory = await mkdtemp(join(tmpdir(), 'skillfit-fenced-sample-'));
   t.after(() => rm(directory, { recursive: true, force: true }));
