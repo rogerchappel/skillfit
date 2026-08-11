@@ -37,14 +37,15 @@ function sections(text) {
   const matches = [];
 
   for (const { index, value } of linesOutsideFences(text)) {
-    const heading = value.match(/^#{2,6}[ \t]+(.+?)(?:[ \t]+#+[ \t]*)?$/);
-    if (heading) matches.push({ index, raw: value, heading: heading[1] });
+    const heading = value.match(/^(#{2,6})[ \t]+(.+?)(?:[ \t]+#+[ \t]*)?$/);
+    if (heading) matches.push({ index, raw: value, level: heading[1].length, heading: heading[2] });
   }
 
   for (let index = 0; index < matches.length; index += 1) {
     const heading = matches[index].heading.trim().toLowerCase();
     const start = matches[index].index + matches[index].raw.length;
-    const end = matches[index + 1]?.index ?? text.length;
+    const boundary = matches.slice(index + 1).find(candidate => candidate.level <= matches[index].level);
+    const end = boundary?.index ?? text.length;
     result.push({ heading, content: text.slice(start, end).trim() });
   }
   return result;
