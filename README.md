@@ -77,8 +77,12 @@ combines its substantive sections in document order. Placeholder-only sections a
 ignored, so they neither override concrete evidence nor create a passing result.
 Headings and activation phrases shown inside backtick or tilde fenced code samples are
 ignored, including everything after an unclosed fence. Real activation guidance before
-or after a closed fence still counts. Fenced commands inside a real supported section
-still count as that section's evidence.
+or after a closed fence still counts. Activation evidence must use an affirmative
+`use this skill`, `when to use`, or `trigger` phrase. An explicitly negated phrase in
+the same clause, such as `Do not use this skill`, `never use this skill`, or
+`when not to use this skill`, does not count; a separate affirmative sentence still
+does. Fenced commands inside a real supported section still count as that section's
+evidence.
 
 The rubric does not interpret whether instructions are correct or safe in context.
 Use it as a release gate and review checklist, not as proof that a skill is
