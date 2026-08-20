@@ -52,8 +52,17 @@ function sections(text) {
 }
 
 function hasActivationGuidance(ctx) {
-  const text = linesOutsideFences(ctx.text).map(({ value }) => value).join('\n');
-  return /use this skill|when to use|trigger/i.test(text);
+  const activation = /\b(?:use this skill|when to use|triggers?)\b/gi;
+  const negation = /\b(?:do not|don't|never|must not|should not|cannot|can't|not to)\b[^.!?;]{0,80}$/i;
+
+  return linesOutsideFences(ctx.text).some(({ value }) => {
+    activation.lastIndex = 0;
+    for (const match of value.matchAll(activation)) {
+      const clausePrefix = value.slice(0, match.index);
+      if (!negation.test(clausePrefix)) return true;
+    }
+    return false;
+  });
 }
 
 function section(ctx, names) {
