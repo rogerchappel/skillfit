@@ -54,6 +54,24 @@ test('package entrypoint rejects negated keyword filler', () => {
   assert.equal(JSON.parse(result.stdout).grade, 'revise');
 });
 
+test('package entrypoint rejects negated activation guidance', async () => {
+  const directory = await mkdtemp(join(tmpdir(), 'skillfit-cli-negated-activation-'));
+  try {
+    const source = await readFile(join(validSkill, 'SKILL.md'), 'utf8');
+    await writeFile(
+      join(directory, 'SKILL.md'),
+      source.replace(/Use this skill[^.]+\./, 'Do not use this skill for any task.')
+    );
+
+    const result = invoke(directory, '--format', 'json');
+    assert.equal(result.status, 1, result.stderr);
+    const report = JSON.parse(result.stdout);
+    assert.equal(report.results.find(({ id }) => id === 'activation').status, 'fail');
+  } finally {
+    await rm(directory, { recursive: true, force: true });
+  }
+});
+
 test('package entrypoint accepts supported headings with closing hashes', async () => {
   const directory = await mkdtemp(join(tmpdir(), 'skillfit-cli-closing-hashes-'));
   try {

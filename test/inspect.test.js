@@ -363,6 +363,37 @@ Use this skill when reviewing a repository's release readiness.`);
   assertStablePerfectReport(report);
 });
 
+test('rejects explicitly negated activation phrases', async t => {
+  for (const guidance of [
+    'Do not use this skill for deployment work.',
+    'Never use this skill for deployment work.',
+    'You should not trigger this workflow for deployment work.',
+    'This section explains when not to use this skill.'
+  ]) {
+    const text = completeSkill(`## Inputs
+
+- local repository path`).replace(
+      'Use this skill when testing deterministic section aggregation behavior.',
+      guidance
+    );
+    const report = await inspectDocument(t, text);
+
+    assert.equal(report.results.find(({ id }) => id === 'activation').status, 'fail', guidance);
+    assert.equal(report.score, 85, guidance);
+  }
+});
+
+test('retains affirmative activation guidance after a negated sentence', async t => {
+  const text = completeSkill(`## Inputs
+
+- local repository path`).replace(
+    'Use this skill when testing deterministic section aggregation behavior.',
+    'Never use this skill for deployments. Use this skill when reviewing local package readiness.'
+  );
+
+  assertStablePerfectReport(await inspectDocument(t, text));
+});
+
 test('ignores closing-hash headings inside fenced samples', async t => {
   const report = await inspectWithInputs(t, `~~~markdown
 ## Required Inputs ###
