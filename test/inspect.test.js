@@ -148,6 +148,27 @@ test('accepts closing hash sequences in CRLF documents', async t => {
   assertStablePerfectReport(await inspectSkill(directory));
 });
 
+test('accepts zero-to-three-space indentation on level 2-6 rubric headings in LF and CRLF documents', async t => {
+  for (const newline of ['\n', '\r\n']) {
+    const text = completeSkill(`   ## Inputs
+
+- local repository path`)
+      .replace('## Side Effects', '  ### Safety')
+      .replace('## Steps', ' #### Workflow')
+      .replace('## Verification', '   ###### Tests')
+      .replaceAll('\n', newline);
+    assertStablePerfectReport(await inspectDocument(t, text));
+  }
+});
+
+test('does not treat four-space-indented rubric labels as headings', async t => {
+  const report = await inspectWithInputs(t, `    ## Inputs
+
+- local repository path`);
+  assert.equal(report.results.find(({ id }) => id === 'inputs').status, 'fail');
+  assert.equal(report.score, 88);
+});
+
 test('does not remove hashes without the required preceding whitespace', async t => {
   const report = await inspectWithInputs(t, `## Inputs###
 
@@ -428,4 +449,48 @@ npm test
 ~~~`);
 
   assertStablePerfectReport(report);
+});
+
+test('accepts tilde-fenced workflow and verification evidence in LF and CRLF documents', async t => {
+  for (const newline of ['\n', '\r\n']) {
+    const text = completeSkill(`## Inputs
+
+- local repository path`)
+      .replace(`## Steps
+
+1. Read the supplied repository path.
+2. Produce a deterministic report for the maintainer.`, `## Examples
+
+~~~sh
+npm run build
+~~~~`)
+      .replace(/Run the tests with .*unrelated keyword filler\./, `~~~sh
+npm test
+~~~
+
+Retain the result for repeatable review. These instructions include enough detail to exercise the substance check without changing the rubric weights or relying on unrelated keyword filler.`)
+      .replace('Retain the result for repeatable review.', 'Retain the result for repeatable review and compare the generated report with the expected package behavior before sharing it with maintainers. Record any difference, rerun the local command, and preserve the final output for inspection.')
+      .replaceAll('\n', newline);
+    assertStablePerfectReport(await inspectDocument(t, text));
+  }
+});
+
+test('requires a matching CommonMark closing fence of at least the opening length', async t => {
+  const text = completeSkill(`## Inputs
+
+- local repository path`)
+    .replace(`## Steps
+
+1. Read the supplied repository path.
+2. Produce a deterministic report for the maintainer.`, `## Examples
+
+~~~~sh
+npm run build
+~~~`)
+    .replace(/Run the tests with .*unrelated keyword filler\./, `~~~sh
+npm test
+\`\`\``);
+  const report = await inspectDocument(t, text);
+  assert.equal(report.results.find(({ id }) => id === 'examples').status, 'fail');
+  assert.equal(report.results.find(({ id }) => id === 'verification').status, 'fail');
 });
