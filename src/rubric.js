@@ -37,7 +37,7 @@ function sections(text) {
   const matches = [];
 
   for (const { index, value } of linesOutsideFences(text)) {
-    const heading = value.match(/^(#{2,6})[ \t]+(.+?)(?:[ \t]+#+[ \t]*)?$/);
+    const heading = value.match(/^ {0,3}(#{2,6})[ \t]+(.+?)(?:[ \t]+#+[ \t]*)?$/);
     if (heading) matches.push({ index, raw: value, level: heading[1].length, heading: heading[2] });
   }
 
@@ -83,6 +83,23 @@ function isPlaceholder(value) {
     .test(value.replace(/^[-*]\s+/, '').trim());
 }
 
+function hasFencedBlock(value) {
+  let fence;
+  for (const rawLine of value.split(/\n/)) {
+    const line = rawLine.replace(/\r$/, '');
+    if (fence) {
+      const closing = line.match(/^ {0,3}(`{3,}|~{3,})[ \t]*$/);
+      if (closing && closing[1][0] === fence.marker && closing[1].length >= fence.length) return true;
+      continue;
+    }
+    const opening = line.match(/^ {0,3}(`{3,}|~{3,})(.*)$/);
+    if (opening && (opening[1][0] === '~' || !opening[2].includes('`'))) {
+      fence = { marker: opening[1][0], length: opening[1].length };
+    }
+  }
+  return false;
+}
+
 function hasDeclaredInputs(ctx) {
   const value = section(ctx, sectionAliases.inputs);
   if (!hasSubstance(value) || isPlaceholder(value)) return false;
@@ -100,13 +117,13 @@ function hasExamplesOrWorkflow(ctx) {
   const value = section(ctx, sectionAliases.examples);
   if (!hasSubstance(value) || isPlaceholder(value)) return false;
   return /(?:^|\n)\s*(?:[-*+]|\d+[.)])\s+\S/m.test(value)
-    || /(?:^|\n)\s*```[\s\S]+?```/m.test(value);
+    || hasFencedBlock(value);
 }
 
 function hasVerification(ctx) {
   const value = section(ctx, sectionAliases.verification);
   if (!hasSubstance(value) || isPlaceholder(value)) return false;
-  return /`[^`\n]+`|```[\s\S]+?```/.test(value)
+  return /`[^`\n]+`/.test(value) || hasFencedBlock(value)
     || /\b(?:run|execute)\s+(?:the\s+)?(?:tests?|checks?|validation|linter|build|smoke)\b/i.test(value);
 }
 
