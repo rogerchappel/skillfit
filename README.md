@@ -57,6 +57,8 @@ The gate runs syntax checks, tests, the build step, fixture-backed CLI smoke, an
 
 The V1 rubric is intentionally deterministic and text based. Inputs, side effects,
 examples/workflow, and verification must appear under level 2–6 Markdown headings.
+Those headings may start in column 1 or use the zero-to-three leading spaces allowed
+by CommonMark; four-space-indented code is not treated as a heading.
 Valid CommonMark closing hash sequences are accepted when whitespace separates them
 from the heading text (for example, `## Inputs ###`).
 Each supported section includes nested child headings and their content until the next
@@ -82,7 +84,8 @@ or after a closed fence still counts. Activation evidence must use an affirmativ
 the same clause, such as `Do not use this skill`, `never use this skill`, or
 `when not to use this skill`, does not count; a separate affirmative sentence still
 does. Fenced commands inside a real supported section still count as that section's
-evidence.
+evidence. Both backtick and tilde fences are supported, including a closing fence
+that uses the same marker and at least as many characters as its opening fence.
 
 The rubric does not interpret whether instructions are correct or safe in context.
 Use it as a release gate and review checklist, not as proof that a skill is
