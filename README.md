@@ -5,7 +5,7 @@
 ## Quickstart
 
 ```bash
-npm install
+npm ci
 npm test
 npm run smoke
 npm run release:check
@@ -44,10 +44,14 @@ same whether the report is printed to stdout or written with `--out`.
 Run the full local gate before opening a release-facing pull request:
 
 ```bash
+npm ci
 npm run release:check
 ```
 
-The gate runs syntax checks, tests, the build step, fixture-backed CLI smoke, and package contents verification. CI runs the same command on Node 18.18.2 (the supported Node 18 baseline) and Node 20 for pull requests and pushes to `main`.
+`npm ci` installs the dependency graph frozen in `package-lock.json`. The gate
+runs syntax checks, tests, the build step, fixture-backed CLI smoke, and package
+contents verification. CI runs both commands on Node 18.18.2 (the supported
+Node 18 baseline) and Node 20 for pull requests and pushes to `main`.
 
 ## Safety Notes
 
