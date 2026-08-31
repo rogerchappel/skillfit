@@ -9,8 +9,8 @@ function linesOutsideFences(text) {
   const lines = [];
   let fence;
 
-  for (const line of text.matchAll(/^.*$/gm)) {
-    const value = line[0].replace(/\r$/, '');
+  for (const line of text.matchAll(/^(.*?)(?:\r?\n|$)/gm)) {
+    const value = line[1];
 
     if (fence) {
       const closing = value.match(/^ {0,3}(`{3,}|~{3,})[ \t]*$/);
@@ -26,7 +26,12 @@ function linesOutsideFences(text) {
       continue;
     }
 
-    lines.push({ index: line.index, value });
+    lines.push({
+      index: line.index,
+      end: line.index + value.length,
+      next: line.index + line[0].length,
+      value
+    });
   }
 
   return lines;
@@ -35,15 +40,32 @@ function linesOutsideFences(text) {
 function sections(text) {
   const result = [];
   const matches = [];
+  const lines = linesOutsideFences(text);
 
-  for (const { index, value } of linesOutsideFences(text)) {
+  for (let lineIndex = 0; lineIndex < lines.length; lineIndex += 1) {
+    const { index, end, next, value } = lines[lineIndex];
     const heading = value.match(/^ {0,3}(#{2,6})[ \t]+(.+?)(?:[ \t]+#+[ \t]*)?$/);
-    if (heading) matches.push({ index, raw: value, level: heading[1].length, heading: heading[2] });
+    if (heading) {
+      matches.push({ index, end, level: heading[1].length, heading: heading[2] });
+      continue;
+    }
+
+    const underline = lines[lineIndex + 1];
+    const isAdjacent = underline?.index === next;
+    const isSetextUnderline = /^ {0,3}-+[ \t]*$/.test(underline?.value ?? '');
+    const isParagraphText = /^ {0,3}\S.*$/.test(value)
+      && !/^ {0,3}#{1,6}(?:[ \t]|$)/.test(value)
+      && !/^ {0,3}(?:(?:\*[ \t]*){3,}|(?:_[ \t]*){3,}|(?:-[ \t]*){3,})$/.test(value);
+
+    if (isAdjacent && isSetextUnderline && isParagraphText) {
+      matches.push({ index, end: underline.end, level: 2, heading: value.trim() });
+      lineIndex += 1;
+    }
   }
 
   for (let index = 0; index < matches.length; index += 1) {
     const heading = matches[index].heading.trim().toLowerCase();
-    const start = matches[index].index + matches[index].raw.length;
+    const start = matches[index].end;
     const boundary = matches.slice(index + 1).find(candidate => candidate.level <= matches[index].level);
     const end = boundary?.index ?? text.length;
     result.push({ heading, content: text.slice(start, end).trim() });
