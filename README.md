@@ -60,13 +60,17 @@ Node 18 baseline) and Node 20 for pull requests and pushes to `main`.
 ## Limitations
 
 The V1 rubric is intentionally deterministic and text based. Inputs, side effects,
-examples/workflow, and verification must appear under level 2–6 Markdown headings.
-Those headings may start in column 1 or use the zero-to-three leading spaces allowed
-by CommonMark; four-space-indented code is not treated as a heading.
+examples/workflow, and verification must appear under level 2–6 ATX Markdown headings
+or level-2 setext headings. Those headings may start in column 1 or use the zero-to-three
+leading spaces allowed by CommonMark; four-space-indented code is not treated as a
+heading. Setext headings use a hyphen underline (for example, `Inputs` followed by
+`---` on the next line).
 Valid CommonMark closing hash sequences are accepted when whitespace separates them
 from the heading text (for example, `## Inputs ###`).
 Each supported section includes nested child headings and their content until the next
-heading of equal or higher rank.
+heading of equal or higher rank. Setext headings follow the same level-2 boundary and
+repeated-alias aggregation rules as `##` ATX headings. Labels and underlines inside
+fenced or four-space-indented code, and thematic breaks without a label, are ignored.
 Supported heading names are:
 
 - Inputs: `Inputs`, `Requirements`, `Required Inputs`, `Required Tools`, or `Tools`.
