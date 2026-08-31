@@ -161,6 +161,72 @@ test('accepts zero-to-three-space indentation on level 2-6 rubric headings in LF
   }
 });
 
+test('grades semantically identical ATX and setext level-2 rubric headings identically in LF and CRLF documents', async t => {
+  const atx = completeSkill(`## Required Tools
+
+- Node.js 18 or newer`)
+    .replace('## Side Effects', '## Approval Boundaries')
+    .replace('## Steps', '## Usage')
+    .replace('## Verification', '## Tests');
+  const setext = atx.replace(/^## (Required Tools|Approval Boundaries|Usage|Tests)$/gm, '$1\n---');
+
+  for (const newline of ['\n', '\r\n']) {
+    const atxReport = await inspectDocument(t, atx.replaceAll('\n', newline));
+    const setextReport = await inspectDocument(t, setext.replaceAll('\n', newline));
+    assert.deepEqual(
+      { score: setextReport.score, grade: setextReport.grade, results: setextReport.results },
+      { score: atxReport.score, grade: atxReport.grade, results: atxReport.results }
+    );
+    assertStablePerfectReport(setextReport);
+  }
+});
+
+test('accepts zero-to-three-space indentation on setext rubric headings', async t => {
+  const text = completeSkill(`   Inputs
+  ---
+
+- local repository path`)
+    .replace('## Side Effects', ' Safety\n ---')
+    .replace('## Steps', '   Workflow\n   ---')
+    .replace('## Verification', 'Tests\n---');
+
+  assertStablePerfectReport(await inspectDocument(t, text));
+});
+
+test('aggregates repeated setext aliases and respects nested ATX boundaries', async t => {
+  const report = await inspectWithInputs(t, `Inputs
+---
+
+None.
+
+### Notes
+
+Nested notes stay inside the first section.
+
+Required Tools
+---
+
+- Node.js 18 or newer
+
+## Appendix
+
+- appendix text is outside the supported sections`);
+
+  assertStablePerfectReport(report);
+});
+
+test('does not treat fenced, code-indented, or thematic-break examples as setext rubric headings', async t => {
+  for (const inputs of [
+    '~~~markdown\nInputs\n---\n~~~',
+    '    Inputs\n    ---',
+    '---\n---'
+  ]) {
+    const report = await inspectWithInputs(t, `${inputs}\n\n- local repository path`);
+    assert.equal(report.results.find(({ id }) => id === 'inputs').status, 'fail');
+    assert.equal(report.score, 88);
+  }
+});
+
 test('does not treat four-space-indented rubric labels as headings', async t => {
   const report = await inspectWithInputs(t, `    ## Inputs
 

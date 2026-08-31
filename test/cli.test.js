@@ -87,6 +87,23 @@ test('package entrypoint accepts supported headings with closing hashes', async 
   }
 });
 
+test('package entrypoint accepts setext level-2 rubric headings in CRLF documents', async () => {
+  const directory = await mkdtemp(join(tmpdir(), 'skillfit-cli-setext-'));
+  try {
+    const source = await readFile(join(validSkill, 'SKILL.md'), 'utf8');
+    const skill = source
+      .replace(/^## (Inputs|Side Effects|Workflow|Verification)$/gm, '$1\n---')
+      .replaceAll('\n', '\r\n');
+    await writeFile(join(directory, 'SKILL.md'), skill);
+
+    const result = invoke(directory, '--format', 'json');
+    assert.equal(result.status, 0, result.stderr);
+    assert.equal(JSON.parse(result.stdout).grade, 'ship');
+  } finally {
+    await rm(directory, { recursive: true, force: true });
+  }
+});
+
 test('package entrypoint exits 1 for an incubate report', () => {
   const result = invoke(incubateSkill, '--format', 'json');
   assert.equal(result.status, 1, result.stderr);
