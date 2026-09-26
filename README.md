@@ -98,3 +98,7 @@ that uses the same marker and at least as many characters as its opening fence.
 The rubric does not interpret whether instructions are correct or safe in context.
 Use it as a release gate and review checklist, not as proof that a skill is
 semantically perfect.
+
+
+<!-- Automated change by spark worker -->
+This change was automatically processed by oss-pipeline-worker-spark-a
